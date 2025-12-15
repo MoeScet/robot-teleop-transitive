@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "╔════════════════════════════════════════════════════════╗"
-echo "║          ngrok Hosted Version Setup Helper             ║"
+echo "║          cloudflare Hosted Version Setup Helper             ║"
 echo "╚════════════════════════════════════════════════════════╝"
 echo ""
 
