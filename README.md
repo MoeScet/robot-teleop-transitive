@@ -13,39 +13,6 @@ A simple robot teleoperation system built with the Transitive framework, featuri
 - Easy deployment scripts
 
 ## Architecture
-┌─────────────────┐
-│  Web Browser    │  ← Users control robot here
-│  (Arrow Keys)   │
-└────────┬────────┘
-│ MQTT (WebSocket)
-▼
-┌─────────────────┐
-│  MQTT Broker    │  ← Message routing
-│  (mosquitto)    │
-└────────┬────────┘
-│ MQTT
-▼
-┌─────────────────┐
-│ Robot Simulator │  ← Physics engine
-│  (Node.js)      │
-└─────────────────┘
-
-## Project Structure
-# Robot Teleoperation with Transitive Framework
-
-A simple robot teleoperation system built with the Transitive framework, featuring real-time control via web interface.
-
-## Features
-
-- Real-time 2D robot physics simulation (50Hz physics, 10Hz state publishing)
-- Intuitive arrow key control
-- Live position (X, Y, θ) and velocity display
-- Web-based interface (no installation needed for users)
-- MQTT communication protocol
-- Fully containerized with Docker
-- Easy deployment scripts
-
-## Architecture
 ```
 ┌─────────────────┐
 │  Web Browser    │  ← Users control robot here
