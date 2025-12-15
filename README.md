@@ -80,7 +80,7 @@ A simple robot teleoperation system built with the Transitive framework, featuri
 │
 ├── cloud/                 # Cloud component (optional, not used)
 │
-├── setup-ngrok.sh         # Helper to configure ngrok URL
+├── setup-cloudflare.sh         # Helper to configure cloudflare URL
 ├── sync-branches.sh       # Sync main branch to hosted branch
 └── README.md              # This file
 ```
@@ -93,7 +93,7 @@ A simple robot teleoperation system built with the Transitive framework, featuri
 - **Docker** (installed in WSL)
 - **Node.js 18+** (for local development)
 - **Python 3** (for web server)
-- **ngrok** (for public hosting - optional)
+- **cloudflare** (for public hosting - optional)
 
 ### Localhost Version (Development)
 
@@ -128,13 +128,13 @@ node index.js
 # Or run other commands...
 ```
 
-## Public Hosting (ngrok)
+## Public Hosting (c)
 
 See [HOSTING.md](HOSTING.md) for detailed instructions on making your robot accessible from anywhere.
 
 Quick overview:
 1. Switch to `hosted` branch
-2. Start ngrok tunnels
+2. Start cloudflare tunnels
 3. Update MQTT URL
 4. Share public URL!
 
@@ -176,8 +176,8 @@ This repository has two main branches:
   - For local testing and development
   
 - **`hosted`** - Public hosting version (production)
-  - MQTT: `wss://your-ngrok-url.ngrok-free.app`
-  - For sharing with others via ngrok
+  - MQTT: `wss://your-cloudflare-url`
+  - For sharing with others via cloudflare
 
 Switch branches:
 ```bash
