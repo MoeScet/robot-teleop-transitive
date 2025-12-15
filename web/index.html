@@ -30,6 +30,12 @@
 <body>
     <div class="container">
         <h1>🤖 Simple Robot Teleop</h1>
+        <div style="background: #fff3cd; padding: 15px; margin-bottom: 20px; border-radius: 8px; border: 2px solid #ffc107;">
+            <strong>🌐 Hosted Version</strong>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">
+                MQTT URL: <code id="mqtt-url-display" style="background: #fff; padding: 2px 6px; border-radius: 3px;">Loading...</code>
+            </p>
+        </div>
         <div id="status" class="status disconnected">✗ Disconnected</div>
         
         <div class="section controls">
@@ -70,7 +76,7 @@
     
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <script>
-        const MQTT_URL = 'ws://localhost:9002';
+        const MQTT_URL = 'wss://sal-nontarnishable-myriadly.ngrok-free.dev';
         const BASE_TOPIC = 'test/robot1';
         const BASE_LINEAR_SPEED = 0.5;
         const BASE_ANGULAR_SPEED = 1.0;
@@ -78,6 +84,8 @@
         let client, connected = false, activeKeys = new Set(), speedMultiplier = 1.0;
         
         console.log('[Web] Connecting to:', MQTT_URL);
+        // Display current MQTT URL
+        document.getElementById('mqtt-url-display').textContent = MQTT_URL;
         client = mqtt.connect(MQTT_URL, { clientId: 'web-' + Math.random().toString(16).substr(2, 8) });
         
         client.on('connect', () => {
