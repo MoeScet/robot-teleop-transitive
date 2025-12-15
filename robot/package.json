@@ -1,0 +1,8 @@
+{
+  "name": "@local/simple-teleop-robot",
+  "version": "0.1.0",
+  "main": "index.js",
+  "dependencies": {
+    "mqtt": "^4.3.7"
+  }
+}

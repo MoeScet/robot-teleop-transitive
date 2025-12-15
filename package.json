@@ -1,0 +1,9 @@
+{
+  "name": "@local/simple-teleop",
+  "version": "0.1.0",
+  "description": "Simple robot teleoperation with position display",
+  "main": "index.js",
+  "keywords": ["robotics", "teleop", "transitive"],
+  "author": "Moesc",
+  "license": "MIT"
+}

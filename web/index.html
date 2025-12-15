@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Robot Teleop</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .status { padding: 15px; margin-bottom: 20px; border-radius: 5px; text-align: center; font-weight: bold; }
+        .status.connected { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.disconnected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .section { margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+        .section h3 { margin-bottom: 15px; color: #495057; }
+        .controls { background: #e7f3ff; border: 2px solid #007bff; }
+        .data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .data-item { text-align: center; padding: 15px; background: white; border-radius: 5px; border: 1px solid #dee2e6; }
+        .data-item .label { font-size: 12px; color: #6c757d; margin-bottom: 5px; }
+        .data-item .value { font-size: 24px; font-weight: bold; color: #007bff; }
+        .data-item .unit { font-size: 14px; color: #6c757d; }
+        .key-list { list-style: none; padding: 0; }
+        .key-list li { padding: 8px; margin: 5px 0; background: white; border-radius: 4px; border-left: 4px solid #6c757d; }
+        .key-list li.active { border-left-color: #007bff; background: #e7f3ff; font-weight: bold; }
+        .emergency-stop { width: 100%; padding: 20px; font-size: 18px; font-weight: bold; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+        .emergency-stop:hover { background: #c82333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Simple Robot Teleop</h1>
+        <div id="status" class="status disconnected">✗ Disconnected</div>
+        
+        <div class="section controls">
+            <h3>🎮 Controls</h3>
+            <ul class="key-list">
+                <li id="key-up">↑ Forward</li>
+                <li id="key-down">↓ Backward</li>
+                <li id="key-left">← Turn Left</li>
+                <li id="key-right">→ Turn Right</li>
+                <li>SPACE - Emergency Stop</li>
+            </ul>
+            <div style="margin-top:15px;">
+                <label>Speed: <span id="speed-value">1.0</span>x</label>
+                <input type="range" id="speed-slider" min="0.1" max="2.0" step="0.1" value="1.0" style="width:100%;">
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>📍 Robot Position</h3>
+            <div class="data-grid">
+                <div class="data-item"><div class="label">X Position</div><div class="value" id="pos-x">0.00</div><div class="unit">meters</div></div>
+                <div class="data-item"><div class="label">Y Position</div><div class="value" id="pos-y">0.00</div><div class="unit">meters</div></div>
+                <div class="data-item"><div class="label">Orientation</div><div class="value" id="pos-theta">0.0</div><div class="unit">degrees</div></div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>⚡ Robot Velocity</h3>
+            <div class="data-grid">
+                <div class="data-item"><div class="label">Linear</div><div class="value" id="vel-linear">0.00</div><div class="unit">m/s</div></div>
+                <div class="data-item"><div class="label">Angular</div><div class="value" id="vel-angular">0.00</div><div class="unit">rad/s</div></div>
+                <div class="data-item"><div class="label">Active Keys</div><div class="value" id="active-keys" style="font-size:18px;">None</div></div>
+            </div>
+        </div>
+        
+        <button class="emergency-stop" id="stop-btn">🛑 EMERGENCY STOP</button>
+    </div>
+    
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+    <script>
+        const MQTT_URL = 'ws://localhost:9002';
+        const BASE_TOPIC = 'test/robot1';
+        const BASE_LINEAR_SPEED = 0.5;
+        const BASE_ANGULAR_SPEED = 1.0;
+        
+        let client, connected = false, activeKeys = new Set(), speedMultiplier = 1.0;
+        
+        console.log('[Web] Connecting to:', MQTT_URL);
+        client = mqtt.connect(MQTT_URL, { clientId: 'web-' + Math.random().toString(16).substr(2, 8) });
+        
+        client.on('connect', () => {
+            console.log('[Web] ✓ Connected');
+            connected = true;
+            document.getElementById('status').className = 'status connected';
+            document.getElementById('status').textContent = '✓ Connected';
+            client.subscribe(`${BASE_TOPIC}/state`);
+        });
+        
+        client.on('message', (topic, payload) => {
+            if (topic === `${BASE_TOPIC}/state`) {
+                try {
+                    const state = JSON.parse(payload.toString());
+                    const pos = state.position || {};
+                    const vel = state.velocity || {};
+                    document.getElementById('pos-x').textContent = (pos.x || 0).toFixed(2);
+                    document.getElementById('pos-y').textContent = (pos.y || 0).toFixed(2);
+                    document.getElementById('pos-theta').textContent = ((pos.theta || 0) * 180 / Math.PI).toFixed(1);
+                    document.getElementById('vel-linear').textContent = (vel.linear || 0).toFixed(2);
+                    document.getElementById('vel-angular').textContent = (vel.angular || 0).toFixed(2);
+                } catch (err) {}
+            }
+        });
+        
+        function sendCommand(linear, angular) {
+            if (!connected) return;
+            client.publish(`${BASE_TOPIC}/cmd`, JSON.stringify({
+                linear: linear * speedMultiplier,
+                angular: angular * speedMultiplier,
+                timestamp: Date.now()
+            }));
+        }
+        
+        function calculateVelocity() {
+            let linear = 0, angular = 0;
+            if (activeKeys.has('ArrowUp')) linear += BASE_LINEAR_SPEED;
+            if (activeKeys.has('ArrowDown')) linear -= BASE_LINEAR_SPEED;
+            if (activeKeys.has('ArrowLeft')) angular += BASE_ANGULAR_SPEED;
+            if (activeKeys.has('ArrowRight')) angular -= BASE_ANGULAR_SPEED;
+            return { linear, angular };
+        }
+        
+        function updateDisplay() {
+            const keys = Array.from(activeKeys).map(k => k.replace('Arrow', ''));
+            document.getElementById('active-keys').textContent = keys.length > 0 ? keys.join(', ') : 'None';
+            ['up', 'down', 'left', 'right'].forEach(dir => {
+                const el = document.getElementById(`key-${dir}`);
+                const key = 'Arrow' + dir.charAt(0).toUpperCase() + dir.slice(1);
+                el.classList.toggle('active', activeKeys.has(key));
+            });
+        }
+        
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+                activeKeys.add(e.key);
+                updateDisplay();
+                const { linear, angular } = calculateVelocity();
+                sendCommand(linear, angular);
+            }
+            if (e.key === ' ') {
+                e.preventDefault();
+                activeKeys.clear();
+                updateDisplay();
+                sendCommand(0, 0);
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+                activeKeys.delete(e.key);
+                updateDisplay();
+                const { linear, angular } = calculateVelocity();
+                sendCommand(linear, angular);
+            }
+        });
+        
+        document.getElementById('speed-slider').addEventListener('input', (e) => {
+            speedMultiplier = parseFloat(e.target.value);
+            document.getElementById('speed-value').textContent = speedMultiplier.toFixed(1);
+            if (activeKeys.size > 0) {
+                const { linear, angular } = calculateVelocity();
+                sendCommand(linear, angular);
+            }
+        });
+        
+        document.getElementById('stop-btn').addEventListener('click', () => {
+            activeKeys.clear();
+            updateDisplay();
+            sendCommand(0, 0);
+        });
+        
+        setInterval(() => {
+            if (activeKeys.size === 0 && connected) sendCommand(0, 0);
+        }, 100);
+    </script>
+</body>
+</html>
