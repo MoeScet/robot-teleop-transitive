@@ -1,93 +1,35 @@
-# Robot Teleoperation with Transitive Framework
+## Quick Start (Using Scripts)
 
-A simple robot teleoperation system built with the Transitive framework, featuring real-time control via web interface.
+### Easiest Way - Automated Scripts
 
-## Features
-
-- Real-time 2D robot physics simulation
-- Arrow key control (WASD alternative)
-- Live position and velocity display
-- Web-based interface (no installation needed)
-- MQTT communication protocol
-- Docker containerized
-
-## Architecture
-```
-Web Browser (Controls) ←→ MQTT Broker ←→ Robot Simulator (Physics)
-```
-
-## Components
-
-- **Robot Component** (`robot/`): Node.js physics simulator
-- **Web Component** (`web/`): HTML/JavaScript interface
-- **Cloud Component** (`cloud/`): Optional server-side processing (not used in basic version)
-
-## Quick Start
-
-### Prerequisites
-
-- Docker
-- Node.js 18+
-- Python 3 (for web server)
-
-### Localhost Version (Development)
-
-**Terminal 1 - Robot Simulator:**
+**Terminal 1 - Robot:**
 ```bash
 cd robot
-docker run -it --rm --name robot-simulator --network cloud_default \
-  -v $(pwd):/app -w /app node:18-alpine sh
-npm install
-node index.js
+./run-robot.sh
 ```
 
-**Terminal 2 - Web Interface:**
+**Terminal 2 - Web:**
 ```bash
 cd web
-python3 -m http.server 8000
+./start-web.sh
 ```
 
 **Open:** http://localhost:8000
 
-### Controls
+### Alternative - Interactive Mode
 
-- `↑` - Move forward
-- `↓` - Move backward
-- `←` - Turn left
-- `→` - Turn right
-- `SPACE` - Emergency stop
-- Speed slider - Adjust velocity multiplier
+If you want to run additional commands in the container:
 
-## Versions
-
-This repository has two main branches:
-
-- `main` - Localhost version (development)
-- `hosted` - ngrok/public hosting version
-
-## Technology Stack
-
-- **Frontend:** HTML, CSS, JavaScript
-- **Backend:** Node.js
-- **Communication:** MQTT (mosquitto)
-- **Containerization:** Docker
-- **Framework:** Transitive Robotics
-
-## Project Structure
-```
-.
-├── robot/              # Robot simulator
-│   ├── index.js       # Physics engine & MQTT client
-│   └── package.json
-├── web/               # Web interface
-│   └── index.html    # Control UI
-└── cloud/            # Cloud component (optional)
+**Terminal 1 - Robot:**
+```bash
+cd robot
+./start-robot.sh
+# Inside container:
+node index.js
 ```
 
-## License
-
-None
-
-## Author
-
-Thet Zin
+**Terminal 2 - Web:**
+```bash
+cd web
+./start-web.sh
+```
